@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: recommend-system
+Version: 0.0.1
+Summary: recommend movie from movielens10k by NN method
+Home-page: https://github.com/platinum-valley
+Author: shinichiro tamiya
+Author-email: s163351@edu.tut.ac.jp
+License: See https://www.python.org/psf/license/
+Description: UNKNOWN
+Platform: UNKNOWN
