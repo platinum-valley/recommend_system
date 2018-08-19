@@ -5,4 +5,4 @@ install
 > python setup.py install
 
 test
-> python setup.py test
+> python recommend.py

@@ -9,7 +9,6 @@ setup(
     author_email='s163351@edu.tut.ac.jp',
     url="https://github.com/platinum-valley",
     install_requires=["numpy", "scipy", "scikit-learn"],
-    #dependency_link=["recommend_system/neighbor.py"],
     license=license,
     test_suite="tests"
 )
