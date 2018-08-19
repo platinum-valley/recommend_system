@@ -7,19 +7,18 @@ from sklearn.model_selection import KFold
 
 
 class Recommend:
-    genre_path = None
-    review_path = None
-    user_path = None
-    item_path = None
-    user_num = None
-    genre_num = None
-    movie_num = None
-    review_num = None
-    genre_att = None
-    review_att = None
-    movie_att = None
-    user_att = None
-    pickle_path = None
+    genre_path = None   #ジャンル情報のファイルパス
+    review_path = None  #レビュー情報のファイルパス
+    user_path = None    #ユーザ情報のファイルパス
+    user_num = None     #ユーザ数
+    genre_num = None    #ジャンル数
+    movie_num = None    #映画本数
+    review_num = None   #レビュー数
+    genre_att = None    #ジャンルの属性
+    review_att = None   #レビューの属性
+    movie_att = None    #映画の属性
+    user_att = None     #ユーザの属性
+    pickle_path = None  #整形済みデータセットのパス
 
     def __init__(self):
         """
@@ -46,7 +45,6 @@ class Recommend:
         self.movie_num = 1682
         self.review_num = 100000
 
-
     def load_data(self, path, att, split_char):
         """
         ファイルの読み出し
@@ -69,6 +67,7 @@ class Recommend:
     def merge_data(self, review_list, user_list, movie_list):
         """
         user_idとmovie_idから、各詳細データを取り出し、review情報とマージする
+
         :param review_list: reviewデータのリスト
         :param user_list: 　userデータのリスト
         :param movie_list:  movieデータのリスト
@@ -80,14 +79,8 @@ class Recommend:
             movie_id = review["movie_id"]
             user_data = [user for user in user_list if user["user_id"] == user_id]
             movie_data = [movie for movie in movie_list if movie["movie_id"] == movie_id]
-            """
-            print(user_id)
-            print(movie_id)
-            print(user_data)
-            print(movie_data)
-            """
+
             user_data[0].update(movie_data[0])
-            #print(user_data)
             merged_data = user_data[0].copy()
             merged_data["rating"] = review["rating"]
             merged_data_list.append(merged_data)
@@ -104,15 +97,17 @@ class Recommend:
 
     def make_movie_vec(self, data_list):
         """
-        ユーザごとの映画ベクトル（仮名）を作成する。
+        ユーザごとの趣味嗜好ベクトルを作成する。
 
         :param data_list: reviewデータのリスト
-        :return movie_vec_array: ユーザごとの映画ベクトルのアレイ
+        :return movie_vec_array: ユーザごとの趣味嗜好ベクトルのアレイ
         :return recommend_movie_array: ユーザごとのレーティングが最も高い映画idのアレイ
         """
+
         movie_vec_array = np.empty((0, self.genre_num+1))
         recommend_movie_array = np.empty(0)
         user_id_array = np.empty(0)
+
         for user_id in range(self.user_num):
             user_id = str(user_id + 1)
             best_movie_rating = 0
@@ -125,14 +120,12 @@ class Recommend:
                 if best_movie_rating < rating:
                     best_movie_id = review["movie_id"]
                 for genre in self.genre_att:
-                    vec = np.append(vec, int(review[genre]) * (rating - 3))
-                    #vec = np.append(vec, int(review[genre]))
+                    vec = np.append(vec, int(review[genre]) * (rating - 3)) #レーティング1~5を-2~2にする
                 movie_vec += vec
+
             user_id_array = np.append(user_id_array, np.array([review_list[0]["user_id"]]), axis=0)
-            #movie_vec = np.reshape(np.append(movie_vec, np.array([review_list[0]["age"]]), axis=0), (1, -1))
-            movie_vec = np.reshape(np.append(movie_vec, np.array(0)),(1, -1))
+            movie_vec = np.reshape(np.append(movie_vec, np.array(0)), (1, -1))
             movie_vec = self.normalize(np.asarray(movie_vec, dtype="float32"))
-            #movie_vec = np.asarray(movie_vec, dtype="float32")
             movie_vec_array = np.append(movie_vec_array, movie_vec, axis=0)
             recommend_movie_array = np.append(recommend_movie_array, np.array([best_movie_id]), axis=0)
         return movie_vec_array, recommend_movie_array, user_id_array
@@ -162,21 +155,22 @@ class Recommend:
 
         """
 
-        if not os.path.exists(self.pickle_path):
+        if not os.path.exists(self.pickle_path):    #データセットpickleがない場合、作成する
             review_list = self.load_data(self.review_path, self.review_att, "	")
             user_list = self.load_data(self.user_path, self.user_att, "\|")
             movie_list = self.load_data(self.movie_path, self.movie_att, "\|")
-            print("loaded_data!")
 
             data_list = self.merge_data(review_list, user_list, movie_list)
-            print("merged_data!")
+
             x_data, y_data, user_list = self.make_movie_vec(data_list)
-            print("make_dataset!")
+
             with open(self.pickle_path, "wb") as f:
                 pickle.dump([x_data, y_data, user_list, movie_list], f)
+
         else:
             x_data, y_data, user_list, movie_list = self.load_dataset()
 
+        #テスト用にデータセットを100分割して、内1つをテストセットとする
         n_fold = 100
         k_fold = KFold(n_fold, shuffle=True)
 
@@ -185,22 +179,19 @@ class Recommend:
             test_x = x_data[test_idx]
             train_y = y_data[train_idx]
             test_y = y_data[test_idx]
-            user_list[test_idx]
 
-            #knn = KNeighborsClassifier(n_neighbors=1, p=1, metric="minkowski")
-            #knn.fit(train_x, train_y)
-
-            #predict_test = knn.predict(test_x)
+            #最近傍法によるレコメンドシステムのインスタンスをつくる
             nn = neighbor.Neighbor(train_x, train_y)
             predict_test = nn.predict(test_x)
+
+            #映画IDから映画のタイトルを表示
             predict_movie = []
             for movie_id in predict_test:
                 predict_movie.append(self.id_to_title(movie_id, movie_list))
             correct_movie = []
             for movie_id in test_y:
                 correct_movie.append(self.id_to_title(movie_id, movie_list))
-            print(test_y)
-            print(predict_test)
+
             print(correct_movie)
             print(predict_movie)
             break

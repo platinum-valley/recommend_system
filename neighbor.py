@@ -26,7 +26,7 @@ class Neighbor:
             best_similarity = -1
             predict_label = None
             for (i, x) in enumerate(self.train_x):
-                cos_sim = 1 - spatial.distance.cosine(pred_x, x)
+                cos_sim = 1 - spatial.distance.cosine(pred_x, x) #コサイン類似度を距離として計算
                 if cos_sim > best_similarity:
                     best_similarity = cos_sim
                     predict_label = self.train_y[i]
