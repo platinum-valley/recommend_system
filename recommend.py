@@ -2,7 +2,8 @@ import numpy as np
 import re
 import os
 import pickle
-from recommend_system import neighbor
+import neighbor
+#from recommend_system import neighbor
 from sklearn.model_selection import KFold
 
 
@@ -20,16 +21,17 @@ class Recommend:
     user_att = None     #ユーザの属性
     pickle_path = None  #整形済みデータセットのパス
 
-    def __init__(self):
+    def __init__(self, dataset_path="./dataset_norm.pickle"):
         """
         初期化関数
 
+        :param dataset_path:　作成済みのデータセットファイルのパス
         """
         self.genre_path = "./ml-100k/u.genre"
         self.review_path = "./ml-100k/u.data"
         self.user_path = "./ml-100k/u.user"
         self.movie_path = "./ml-100k/u.item"
-        self.pickle_path = "../dataset_norm.pickle"
+        self.pickle_path = dataset_path
 
         self.genre_att = ["unknown","Action","Adventure","Animation","Children's","Comedy","Crime","Documentary",
                           "Drama","Fantasy","Film-Noir","Horror","Musical","Mystery","Romance","Sci-Fi","Thriller",
@@ -198,5 +200,5 @@ class Recommend:
 
 
 if __name__ == "__main__":
-    model = Recommend()
+    model = Recommend("./dataset_norm.pickle")
     model.train()

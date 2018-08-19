@@ -1,6 +1,6 @@
 
 import unittest
-from recommend_system import recommend
+from .. import recommend
 
 
 class RecommendTest(unittest.TestCase):
@@ -9,7 +9,7 @@ class RecommendTest(unittest.TestCase):
         """
         テストケース
         """
-        model = recommend.Recommend()
+        model = recommend.Recommend("../dataset_norm.pickle")
         model.train()
 
 
