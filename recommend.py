@@ -193,8 +193,9 @@ class Recommend:
             correct_movie = []
             for movie_id in test_y:
                 correct_movie.append(self.id_to_title(movie_id, movie_list))
-
+            print("correct_label")
             print(correct_movie)
+            print("predict_label")
             print(predict_movie)
             break
 
